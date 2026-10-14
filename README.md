@@ -43,3 +43,9 @@ Detalhes de rotas, seeds e contas de teste estão em [backend/README.md](backend
 ## Equipe
 
 - Eduardo Centenaro
+
+## Uso de IA
+
+O desenvolvimento deste projeto foi acompanhado e revisado com o auxílio do
+[Claude Code](https://claude.com/claude-code), assistente de programação da Anthropic, utilizado na
+análise dos requisitos, na organização do repositório e na revisão e correção do código.
