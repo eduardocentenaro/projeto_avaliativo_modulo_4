@@ -17,7 +17,9 @@ import { JWT_EXPIRES_IN, JWT_SECRET } from "../constants/auth.js";
 import { PORTES } from "../constants/pets.js";
 import { SITUACAO_PET } from "../constants/adocoes.js";
 
-import { buscarSituacoes } from "../utils/situacaoPet.js";
+import { verifyIdExistsHandler } from "../middlewares/global/verifyIdExistsHandler.js";
+
+import { buscarSituacao, buscarSituacoes } from "../utils/situacaoPet.js";
 import { paraInteiro, responderErros } from "../utils/validacao.js";
 
 const publicRoutes = new Router();
@@ -115,5 +117,22 @@ publicRoutes.get("/pets-disponiveis", async (request, response) => {
 
   response.status(OK_STATUS).send(vitrine);
 });
+
+// Detalhes do pet. Também devolve adotados e arquivados, que aparecem em "Minhas adoções".
+publicRoutes.get(
+  "/pets/:id",
+  verifyIdExistsHandler(PetEntity, "Pet"),
+  async (request, response) => {
+    const pet = await consultaPets()
+      .where("pet.id = :id", { id: request.registro.id })
+      .getOne();
+
+    const situacao = pet.arquivado_em
+      ? SITUACAO_PET.ARQUIVADO
+      : await buscarSituacao(pet.id);
+
+    response.status(OK_STATUS).send({ ...pet, situacao });
+  },
+);
 
 export default publicRoutes;
