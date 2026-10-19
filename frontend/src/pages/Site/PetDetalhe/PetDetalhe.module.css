@@ -1,2 +1,81 @@
-.container {
+.topo {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 32px;
+  align-items: start;
+}
+
+@media (max-width: 760px) {
+  .topo {
+    grid-template-columns: 1fr;
+  }
+}
+
+.foto {
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+  border-radius: var(--raio);
+}
+
+.nome {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-top: 0;
+}
+
+.ficha {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 6px 16px;
+  margin: 0 0 20px;
+}
+
+.ficha dt {
+  font-weight: 600;
+}
+
+.ficha dd {
+  margin: 0;
+}
+
+.adocao h2 {
+  margin-top: 0;
+}
+
+.acoes {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.etapas {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  list-style: none;
+  padding: 0;
+}
+
+.etapas li {
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: #eee;
+  font-size: 0.85rem;
+}
+
+.etapas li.feita {
+  background: var(--cor-primaria);
+  color: #fff;
+}
+
+.historico {
+  padding-left: 18px;
+  font-size: 0.9rem;
+}
+
+.textos {
+  margin-top: 24px;
 }
