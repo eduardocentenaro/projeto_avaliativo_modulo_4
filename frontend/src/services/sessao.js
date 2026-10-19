@@ -4,9 +4,26 @@ const CHAVE = '@dadoslogin'
 
 export const ROLES = { ADMIN: 'admin', LAR: 'lar' }
 
+// true quando o token JWT já passou do "exp" (expira em 24h)
+function tokenExpirado(token) {
+  try {
+    const payload = JSON.parse(atob(token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/')))
+    return payload.exp * 1000 <= Date.now()
+  } catch {
+    return true
+  }
+}
+
+// Sessão salva, ou null se não houver ou se o token já expirou (nesse caso ela é apagada)
 export function getSessao() {
   try {
-    return JSON.parse(localStorage.getItem(CHAVE)) || null
+    const sessao = JSON.parse(localStorage.getItem(CHAVE))
+    if (!sessao) return null
+    if (tokenExpirado(sessao.token)) {
+      localStorage.removeItem(CHAVE)
+      return null
+    }
+    return sessao
   } catch {
     return null
   }
