@@ -1,0 +1,237 @@
+/* Estilos globais do site: cores, tipografia, menu, botões, formulários e cards */
+:root {
+  --cor-primaria: #e8743b;
+  --cor-primaria-escura: #c85d27;
+  --cor-texto: #2b2b2b;
+  --cor-texto-suave: #666;
+  --cor-fundo: #faf7f4;
+  --cor-superficie: #fff;
+  --cor-borda: #e6e0da;
+  --cor-sucesso: #2e7d32;
+  --cor-erro: #c62828;
+  --raio: 10px;
+  --sombra: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  color: var(--cor-texto);
+  background: var(--cor-fundo);
+  line-height: 1.5;
+}
+
+main {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 24px 16px 48px;
+}
+
+h1, h2, h3 {
+  line-height: 1.2;
+}
+
+a {
+  color: var(--cor-primaria-escura);
+}
+
+img {
+  max-width: 100%;
+}
+
+/* menu do site */
+.site-header {
+  background: var(--cor-superficie);
+  border-bottom: 1px solid var(--cor-borda);
+}
+
+.site-nav {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 12px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.site-nav .marca {
+  font-weight: 700;
+  font-size: 1.15rem;
+  color: var(--cor-texto);
+  text-decoration: none;
+}
+
+.site-nav .links {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.site-nav .links a {
+  color: var(--cor-texto);
+  text-decoration: none;
+}
+
+.site-nav .links a.active {
+  color: var(--cor-primaria-escura);
+  font-weight: 600;
+}
+
+.site-nav .usuario {
+  color: var(--cor-texto-suave);
+}
+
+/* rodapé do site */
+.site-footer {
+  border-top: 1px solid var(--cor-borda);
+  background: var(--cor-superficie);
+  text-align: center;
+  padding: 20px 16px;
+  color: var(--cor-texto-suave);
+  font-size: 0.9rem;
+}
+
+.site-footer p {
+  margin: 4px 0;
+}
+
+/* botões */
+button,
+.botao {
+  display: inline-block;
+  padding: 10px 18px;
+  border: none;
+  border-radius: var(--raio);
+  background: var(--cor-primaria);
+  color: #fff !important;
+  font: inherit;
+  font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+button:hover,
+.botao:hover {
+  background: var(--cor-primaria-escura);
+}
+
+button:disabled {
+  background: #bbb;
+  cursor: not-allowed;
+}
+
+.botao-secundario {
+  background: transparent;
+  color: var(--cor-primaria-escura) !important;
+  border: 1px solid var(--cor-primaria);
+}
+
+.botao-secundario:hover {
+  background: #fdeee6;
+}
+
+.botao-link {
+  background: none;
+  padding: 0;
+  color: var(--cor-primaria-escura) !important;
+  font-weight: 400;
+}
+
+.botao-link:hover {
+  background: none;
+  text-decoration: underline;
+}
+
+/* formulários */
+label {
+  display: block;
+  font-weight: 600;
+  margin-bottom: 12px;
+}
+
+input,
+select,
+textarea {
+  display: block;
+  width: 100%;
+  margin-top: 4px;
+  padding: 10px 12px;
+  border: 1px solid var(--cor-borda);
+  border-radius: 8px;
+  font: inherit;
+  font-weight: 400;
+  background: #fff;
+}
+
+input[type='checkbox'],
+input[type='radio'] {
+  display: inline-block;
+  width: auto;
+  margin: 0 6px 0 0;
+}
+
+.erro-campo {
+  display: block;
+  color: var(--cor-erro);
+  font-size: 0.875rem;
+  font-weight: 400;
+  margin-top: 4px;
+}
+
+.alerta-erro,
+.alerta-sucesso {
+  padding: 12px 16px;
+  border-radius: var(--raio);
+  margin: 12px 0;
+}
+
+.alerta-erro {
+  background: #fdecea;
+  color: var(--cor-erro);
+}
+
+.alerta-sucesso {
+  background: #e8f5e9;
+  color: var(--cor-sucesso);
+}
+
+/* cards e grades */
+.card {
+  background: var(--cor-superficie);
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio);
+  box-shadow: var(--sombra);
+  padding: 16px;
+}
+
+.grade {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 20px;
+}
+
+.selo {
+  display: inline-block;
+  padding: 2px 10px;
+  border-radius: 999px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  background: #eee;
+}
+
+.selo-DISPONIVEL { background: #e8f5e9; color: var(--cor-sucesso); }
+.selo-EM_PROCESSO { background: #fff4e5; color: #a65c00; }
+.selo-RESERVADO { background: #e3f2fd; color: #1565c0; }
+.selo-ADOTADO { background: #f3e5f5; color: #6a1b9a; }
+.selo-ARQUIVADO { background: #eee; color: #555; }
+
+.texto-suave {
+  color: var(--cor-texto-suave);
+}

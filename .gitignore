@@ -2,3 +2,7 @@ node_modules
 dist
 .env
 .vscode/
+
+# Arquivos locais (não versionar)
+Lab365PetAmigo_Projeto_Completo.md
+.claude/

@@ -6,15 +6,41 @@ import { AppDataSource } from "../config/database_postgres.js";
 
 import { UsuarioEntity } from "../entidades/Usuario.js";
 import { LarAdotivoEntity } from "../entidades/LarAdotivo.js";
+import { PetEntity } from "../entidades/Pet.js";
+import { TipoEntity } from "../entidades/Tipo.js";
+import { RacaEntity } from "../entidades/Raca.js";
+import { CorEntity } from "../entidades/Cor.js";
 
-import { BAD_REQUEST_STATUS, OK_STATUS } from "../constants/server.js";
+import {
+  BAD_REQUEST_STATUS,
+  CONFLICT_STATUS,
+  CREATED_STATUS,
+  OK_STATUS,
+} from "../constants/server.js";
 import { ROLES } from "../constants/roles.js";
-import { JWT_EXPIRES_IN, JWT_SECRET } from "../constants/auth.js";
+import { JWT_EXPIRES_IN, JWT_SECRET, SALT_ROUNDS } from "../constants/auth.js";
+import { PORTES } from "../constants/pets.js";
+import { SITUACAO_PET } from "../constants/adocoes.js";
+
+import { verifyIdExistsHandler } from "../middlewares/global/verifyIdExistsHandler.js";
+import { validarLar } from "../middlewares/validacoes/validarLar.js";
+
+import { buscarSituacao, buscarSituacoes } from "../utils/situacaoPet.js";
+import { paraInteiro, responderErros } from "../utils/validacao.js";
 
 const publicRoutes = new Router();
 
 const usuarioRepository = AppDataSource.getRepository(UsuarioEntity);
 const larRepository = AppDataSource.getRepository(LarAdotivoEntity);
+const petRepository = AppDataSource.getRepository(PetEntity);
+
+// Consulta base dos pets já com tipo, raça e cor como objetos (as entidades não declaram relações)
+const consultaPets = () =>
+  petRepository
+    .createQueryBuilder("pet")
+    .leftJoinAndMapOne("pet.tipo", TipoEntity, "tipo", "tipo.id = pet.tipo_id")
+    .leftJoinAndMapOne("pet.raca", RacaEntity, "raca", "raca.id = pet.raca_id")
+    .leftJoinAndMapOne("pet.cor", CorEntity, "cor", "cor.id = pet.cor_id");
 
 const gerarToken = (id, role) =>
   jwt.sign({ id, role }, JWT_SECRET, { expiresIn: JWT_EXPIRES_IN });
@@ -60,5 +86,79 @@ publicRoutes.post("/auth/login", async (request, response) => {
     token: gerarToken(conta.id, role),
   });
 });
+
+// Cadastro público do lar adotivo. Não faz login automático: depois o lar entra por /auth/login.
+publicRoutes.post("/lares-adotivos", validarLar(), async (request, response) => {
+  const dados = request.dadosLar;
+
+  // o e-mail não pode estar em uso por outro lar nem por alguém da equipe
+  const emailEmUso =
+    (await larRepository.existsBy({ email: dados.email })) ||
+    (await usuarioRepository.existsBy({ email: dados.email }));
+  if (emailEmUso) {
+    return response
+      .status(CONFLICT_STATUS)
+      .send({ error: "Este e-mail já está cadastrado", campos: { email: "Este e-mail já está cadastrado" } });
+  }
+
+  const senha = await bcrypt.hash(dados.senha, SALT_ROUNDS);
+  const { senha: _senha, ...lar } = await larRepository.save({ ...dados, senha });
+
+  response.status(CREATED_STATUS).send(lar);
+});
+
+// Vitrine: pets ainda não adotados nem arquivados (disponíveis, em processo e reservados)
+publicRoutes.get("/pets-disponiveis", async (request, response) => {
+  const { tipo_id, porte, busca } = request.query;
+  const erros = {};
+
+  const tipoId = tipo_id === undefined ? undefined : paraInteiro(tipo_id);
+  if (Number.isNaN(tipoId)) erros.tipo_id = "tipo_id deve ser um número inteiro";
+
+  const porteFiltro = porte === undefined ? undefined : String(porte).toUpperCase();
+  if (porteFiltro !== undefined && !PORTES.includes(porteFiltro)) {
+    erros.porte = `porte deve ser ${PORTES.join(", ")}`;
+  }
+
+  if (Object.keys(erros).length) return responderErros(response, erros);
+
+  const consulta = consultaPets()
+    .where("pet.arquivado_em IS NULL")
+    .orderBy("pet.nome", "ASC");
+
+  if (tipoId !== undefined) consulta.andWhere("pet.tipo_id = :tipoId", { tipoId });
+  if (porteFiltro) consulta.andWhere("pet.porte = :porte", { porte: porteFiltro });
+  if (busca && String(busca).trim()) {
+    consulta.andWhere("(pet.nome ILIKE :busca OR raca.nome ILIKE :busca)", {
+      busca: `%${String(busca).trim()}%`,
+    });
+  }
+
+  const pets = await consulta.getMany();
+  const situacoes = await buscarSituacoes(pets.map((pet) => pet.id));
+
+  const vitrine = pets
+    .map((pet) => ({ ...pet, situacao: situacoes.get(pet.id) || SITUACAO_PET.DISPONIVEL }))
+    .filter((pet) => pet.situacao !== SITUACAO_PET.ADOTADO);
+
+  response.status(OK_STATUS).send(vitrine);
+});
+
+// Detalhes do pet. Também devolve adotados e arquivados, que aparecem em "Minhas adoções".
+publicRoutes.get(
+  "/pets/:id",
+  verifyIdExistsHandler(PetEntity, "Pet"),
+  async (request, response) => {
+    const pet = await consultaPets()
+      .where("pet.id = :id", { id: request.registro.id })
+      .getOne();
+
+    const situacao = pet.arquivado_em
+      ? SITUACAO_PET.ARQUIVADO
+      : await buscarSituacao(pet.id);
+
+    response.status(OK_STATUS).send({ ...pet, situacao });
+  },
+);
 
 export default publicRoutes;

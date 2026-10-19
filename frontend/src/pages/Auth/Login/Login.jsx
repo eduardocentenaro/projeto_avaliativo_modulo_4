@@ -1,6 +1,7 @@
 import { useState } from 'react'
-import { Link, useLocation, useNavigate } from 'react-router-dom'
+import { Link, useLocation, useNavigate, useSearchParams } from 'react-router-dom'
 import api from '../../../services/api'
+import { salvarSessao, telaInicial } from '../../../services/sessao'
 import styles from './Login.module.css'
 
 // Login único para a equipe e para os lares adotivos: POST /auth/login.
@@ -11,7 +12,13 @@ export default function Login() {
   // tela de onde o usuário veio (ex.: uma rota protegida ou a página de um pet), para voltar depois do login.
   // petId: veio do botão de adotar; a página do pet usa isso para reabrir o pedido de adoção.
   // mensagem e email: vindos do cadastro, que manda o lar para cá depois de cadastrar
-  const { redirectTo, petId, mensagem } = location.state || {}
+  // ?expirada=1&voltar=/tela: o services/api manda para cá quando a API recusa o token
+  const [params] = useSearchParams()
+  const voltar = params.get('voltar')
+  const { petId } = location.state || {}
+  const redirectTo = location.state?.redirectTo || (voltar?.startsWith('/') ? voltar : undefined)
+  const mensagem =
+    location.state?.mensagem || (params.get('expirada') ? 'Sua sessão expirou. Entre novamente.' : '')
 
   const [email, setEmail] = useState(location.state?.email || '')
   const [senha, setSenha] = useState('')
@@ -24,11 +31,11 @@ export default function Login() {
     setEnviando(true)
     try {
       const { data: usuario } = await api.post('/auth/login', { email, senha })
-      // TODO: salvar a sessão no localStorage na chave "@dadoslogin" (o services/api lê o token de lá)
-       localStorage.setItem("@dadoslogin", JSON.stringify(usuario));
-      // e redirecionar: equipe -> /admin/processos; lar -> /pets (ou redirectTo, repassando { petId })
-      console.log(usuario)
-      setEnviando(false)
+      salvarSessao(usuario)
+      // volta para a tela de onde veio (repassando o petId para reabrir o pedido de adoção);
+      // sem tela de retorno: equipe -> /admin/processos, lar -> /pets
+      if (redirectTo) navigate(redirectTo, { replace: true, state: petId ? { petId } : undefined })
+      else navigate(telaInicial(usuario.role), { replace: true })
     } catch (err) {
       setErro(err.response?.data?.error || 'Não foi possível conectar ao servidor.')
       setEnviando(false)

@@ -3,6 +3,19 @@
   gap: 24px;
 }
 
+.menu {
+  min-width: 200px;
+}
+
+.menu ul {
+  list-style: none;
+  padding: 0;
+}
+
+.menu li {
+  margin-bottom: 8px;
+}
+
 .conteudo {
   flex: 1;
 }
