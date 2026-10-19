@@ -11,13 +11,19 @@ import { TipoEntity } from "../entidades/Tipo.js";
 import { RacaEntity } from "../entidades/Raca.js";
 import { CorEntity } from "../entidades/Cor.js";
 
-import { BAD_REQUEST_STATUS, OK_STATUS } from "../constants/server.js";
+import {
+  BAD_REQUEST_STATUS,
+  CONFLICT_STATUS,
+  CREATED_STATUS,
+  OK_STATUS,
+} from "../constants/server.js";
 import { ROLES } from "../constants/roles.js";
-import { JWT_EXPIRES_IN, JWT_SECRET } from "../constants/auth.js";
+import { JWT_EXPIRES_IN, JWT_SECRET, SALT_ROUNDS } from "../constants/auth.js";
 import { PORTES } from "../constants/pets.js";
 import { SITUACAO_PET } from "../constants/adocoes.js";
 
 import { verifyIdExistsHandler } from "../middlewares/global/verifyIdExistsHandler.js";
+import { validarLar } from "../middlewares/validacoes/validarLar.js";
 
 import { buscarSituacao, buscarSituacoes } from "../utils/situacaoPet.js";
 import { paraInteiro, responderErros } from "../utils/validacao.js";
@@ -79,6 +85,26 @@ publicRoutes.post("/auth/login", async (request, response) => {
     role,
     token: gerarToken(conta.id, role),
   });
+});
+
+// Cadastro público do lar adotivo. Não faz login automático: depois o lar entra por /auth/login.
+publicRoutes.post("/lares-adotivos", validarLar(), async (request, response) => {
+  const dados = request.dadosLar;
+
+  // o e-mail não pode estar em uso por outro lar nem por alguém da equipe
+  const emailEmUso =
+    (await larRepository.existsBy({ email: dados.email })) ||
+    (await usuarioRepository.existsBy({ email: dados.email }));
+  if (emailEmUso) {
+    return response
+      .status(CONFLICT_STATUS)
+      .send({ error: "Este e-mail já está cadastrado", campos: { email: "Este e-mail já está cadastrado" } });
+  }
+
+  const senha = await bcrypt.hash(dados.senha, SALT_ROUNDS);
+  const { senha: _senha, ...lar } = await larRepository.save({ ...dados, senha });
+
+  response.status(CREATED_STATUS).send(lar);
 });
 
 // Vitrine: pets ainda não adotados nem arquivados (disponíveis, em processo e reservados)
