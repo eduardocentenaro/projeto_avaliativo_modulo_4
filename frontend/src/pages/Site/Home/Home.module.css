@@ -1,2 +1,79 @@
-.container {
+.hero {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  padding: 40px 32px;
+  border-radius: var(--raio);
+  background: linear-gradient(135deg, #fdeee6, #fff7ef);
+}
+
+.hero h1 {
+  font-size: 2.4rem;
+  margin-top: 0;
+}
+
+.hero p {
+  max-width: 560px;
+  font-size: 1.1rem;
+}
+
+.emoji {
+  font-size: 6rem;
+}
+
+@media (max-width: 700px) {
+  .hero {
+    flex-direction: column;
+    text-align: center;
+    padding: 28px 16px;
+  }
+
+  .hero h1 {
+    font-size: 1.9rem;
+  }
+
+  .emoji {
+    font-size: 4rem;
+  }
+
+  .acoes {
+    justify-content: center;
+  }
+}
+
+.acoes {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.secao {
+  margin-top: 48px;
+}
+
+.passos {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+}
+
+.passos h3 {
+  margin: 8px 0 4px;
+}
+
+.icone {
+  font-size: 2rem;
+}
+
+.chamada {
+  text-align: center;
+  padding: 32px 16px;
+  border-radius: var(--raio);
+  background: var(--cor-superficie);
+  border: 1px solid var(--cor-borda);
+}
+
+.chamada h2 {
+  margin-top: 0;
 }

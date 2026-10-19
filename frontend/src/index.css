@@ -88,6 +88,20 @@ img {
   color: var(--cor-texto-suave);
 }
 
+/* rodapé do site */
+.site-footer {
+  border-top: 1px solid var(--cor-borda);
+  background: var(--cor-superficie);
+  text-align: center;
+  padding: 20px 16px;
+  color: var(--cor-texto-suave);
+  font-size: 0.9rem;
+}
+
+.site-footer p {
+  margin: 4px 0;
+}
+
 /* botões */
 button,
 .botao {
