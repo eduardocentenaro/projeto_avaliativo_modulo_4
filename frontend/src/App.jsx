@@ -1,5 +1,6 @@
 import { Navigate, Routes, Route, useLocation } from 'react-router-dom'
 import Header from './components/Header.jsx'
+import Footer from './components/Footer.jsx'
 import Home from './pages/Site/Home/Home.jsx'
 import Pets from './pages/Site/Pets/Pets.jsx'
 import PetDetalhe from './pages/Site/PetDetalhe/PetDetalhe.jsx'
@@ -64,6 +65,7 @@ export default function App() {
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </main>
+      {!telaAdmin && <Footer />}
     </>
   )
 }
