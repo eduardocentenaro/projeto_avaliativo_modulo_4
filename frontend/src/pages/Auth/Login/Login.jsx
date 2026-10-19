@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import api from '../../../services/api'
+import { salvarSessao, telaInicial } from '../../../services/sessao'
 import styles from './Login.module.css'
 
 // Login único para a equipe e para os lares adotivos: POST /auth/login.
@@ -24,11 +25,11 @@ export default function Login() {
     setEnviando(true)
     try {
       const { data: usuario } = await api.post('/auth/login', { email, senha })
-      // TODO: salvar a sessão no localStorage na chave "@dadoslogin" (o services/api lê o token de lá)
-       localStorage.setItem("@dadoslogin", JSON.stringify(usuario));
-      // e redirecionar: equipe -> /admin/processos; lar -> /pets (ou redirectTo, repassando { petId })
-      console.log(usuario)
-      setEnviando(false)
+      salvarSessao(usuario)
+      // volta para a tela de onde veio (repassando o petId para reabrir o pedido de adoção);
+      // sem tela de retorno: equipe -> /admin/processos, lar -> /pets
+      if (redirectTo) navigate(redirectTo, { replace: true, state: petId ? { petId } : undefined })
+      else navigate(telaInicial(usuario.role), { replace: true })
     } catch (err) {
       setErro(err.response?.data?.error || 'Não foi possível conectar ao servidor.')
       setEnviando(false)
